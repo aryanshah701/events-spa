@@ -1,6 +1,6 @@
 import { Row, Col, Form, Button, Badge } from "react-bootstrap";
 import { useState } from "react";
-import { apiLogin, apiRegister } from "../../api";
+import { apiLogin, apiRegister, fetchUserData } from "../../api";
 import { useHistory } from "react-router-dom";
 
 // Register Page
@@ -88,7 +88,13 @@ function RegisterForm() {
           (isLoginSuccess) => {
             if (isLoginSuccess) {
               // Logged in, so redirect to user page
-              history.push("/users/show");
+              const successDataFetch = fetchUserData();
+
+              if (successDataFetch) {
+                history.push("/users/show");
+              } else {
+                history.push("/login");
+              }
             } else {
               // Something went wrong when attempting to login
               history.push("/login");

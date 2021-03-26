@@ -57,10 +57,11 @@ const AuthenticationInfo = connect(stateToProps)(({ session }) => {
       </Row>
     );
   } else {
+    const userShowPath = "/users/show";
     return (
       <Row>
         <Nav.Item>
-          <NavLink to="/" className="nav-link mx-2 text-capitalize">
+          <NavLink to={userShowPath} className="nav-link mx-2 text-capitalize">
             {session.name}
           </NavLink>
         </Nav.Item>

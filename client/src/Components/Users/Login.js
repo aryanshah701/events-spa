@@ -2,7 +2,7 @@ import { Form, Button, Row, Col } from "react-bootstrap";
 
 import { useState } from "react";
 import { useHistory } from "react-router-dom";
-import { apiLogin } from "../../api";
+import { apiLogin, fetchUserData } from "../../api";
 import { connect } from "react-redux";
 
 // The login page
@@ -19,9 +19,18 @@ function LoginUser() {
   // Authenticate the user and the redirect to the user's page
   function login(ev) {
     ev.preventDefault();
+
+    // Login and redirect to user page
     apiLogin(user.email, user.password).then((isSuccess) => {
       if (isSuccess) {
-        history.push("/users/show");
+        // Fetch user data before redirecting
+        const successFetch = fetchUserData();
+
+        if (successFetch) {
+          history.push("/users/show");
+        } else {
+          history.push("/login");
+        }
       } else {
         history.push("/login");
       }
