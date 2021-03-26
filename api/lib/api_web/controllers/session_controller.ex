@@ -12,6 +12,7 @@ defmodule ApiWeb.SessionController do
         token: Phoenix.Token.sign(conn, "user_id", authenticated_user.id),
         name: authenticated_user.name,
         id: authenticated_user.id,
+        user_email: authenticated_user.email,
       }
 
       conn 

@@ -15,9 +15,6 @@ defmodule ApiWeb.InviteController do
   end
 
   def create(conn, %{"invite" => invite_params}) do
-    invite_params = invite_params
-    |> Map.put("response", "no response")
-
     with {:ok, %Invite{} = invite} <- Invites.create_invite(invite_params) do
       invite = Api.Invites.load_invite(invite)
       conn
