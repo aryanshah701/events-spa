@@ -1,5 +1,6 @@
 // Styles
 import "./App.scss";
+import "react-datetime/css/react-datetime.css";
 import { Container } from "react-bootstrap";
 
 // React router and components
@@ -10,6 +11,7 @@ import NewUser from "./Components/Users/New";
 import LoginUser from "./Components/Users/Login";
 import ShowEvent from "./Components/Events/Show";
 import NewEvent from "./Components/Events/New";
+import EditEvent from "./Components/Events/Edit";
 
 export default function App() {
   return (
@@ -30,6 +32,9 @@ export default function App() {
         </Route>
         <Route path="/events/new" exact>
           <NewEvent />
+        </Route>
+        <Route path="/events/:id/edit">
+          <EditEvent />
         </Route>
         <Route path="/events/:id">
           <ShowEvent />

@@ -6,11 +6,12 @@ const apiUrl =
     ? "https://events-api.aryanshah.tech/api/v1"
     : "http://localhost:4000/api/v1";
 
-async function postRequest(endpoint, body) {
+async function postRequest(endpoint, body, token = "") {
   const options = {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "x-auth": token,
     },
     body: JSON.stringify(body),
   };
@@ -124,13 +125,7 @@ export function fetchUserData() {
   const session = state.session;
 
   // If the user is not logged in, dispatch error
-  if (!session) {
-    const errorAction = {
-      type: "error/set",
-      data: "Sorry you need to be logged in for this.",
-    };
-
-    store.dispatch(errorAction);
+  if (!isLoggedIn(session)) {
     return false;
   }
 
@@ -166,13 +161,7 @@ export function fetchEvents() {
   const session = state.session;
 
   // If the user is not logged in, dispatch error
-  if (!session) {
-    const errorAction = {
-      type: "error/set",
-      data: "Sorry you need to be logged in for this.",
-    };
-
-    store.dispatch(errorAction);
+  if (!isLoggedIn(session)) {
     return false;
   }
 
@@ -197,6 +186,21 @@ export function fetchEvents() {
   return isSuccess;
 }
 
+function isLoggedIn(session) {
+  // If the user is not logged in, dispatch error
+  if (!session) {
+    const errorAction = {
+      type: "error/set",
+      data: "Sorry you need to be logged in for this.",
+    };
+
+    store.dispatch(errorAction);
+    return false;
+  }
+
+  return true;
+}
+
 export function fetchEventData(eventId, token) {
   // Make the get request and dispatch the data if successful
   const isSuccess = getRequest("/events/" + eventId, token)
@@ -218,6 +222,65 @@ export function fetchEventData(eventId, token) {
     });
 
   return isSuccess;
+}
+
+export async function apiCreateNewEvent(event) {
+  // Get the user id from the session and at it to the event
+  const state = store.getState();
+  const session = state.session;
+
+  // Ensure that the user is logged in
+  if (!isLoggedIn(session)) {
+    return null;
+  }
+
+  const token = session.token;
+  const userId = session.id;
+
+  const newEvent = {
+    ...event,
+    user_id: userId,
+  };
+
+  const isSuccess = postRequest("/events", { event: newEvent }, token).then(
+    (response) => {
+      if (response.data) {
+        // Event creation was successful
+        console.log(response.data);
+        return response.data.id;
+      } else {
+        // If the event creation is not successful, dispatch an error
+        const err = getEventCreateError(response.errors);
+
+        if (err !== "") {
+          const errorAction = {
+            data: err,
+            type: "error/set",
+          };
+
+          store.dispatch(errorAction);
+        }
+
+        return null;
+      }
+    }
+  );
+
+  return isSuccess;
+}
+
+function getEventCreateError(errors) {
+  if (errors.description) {
+    return "Description: " + errors.description[0];
+  }
+
+  if (errors.name) {
+    return "Name: " + errors.name[0];
+  }
+
+  if (errors.date) {
+    return "Date: " + errors.date[0];
+  }
 }
 
 export function fetchData() {

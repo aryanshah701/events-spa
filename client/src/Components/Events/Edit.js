@@ -1,64 +1,40 @@
 import { Row, Col, Form, Button } from "react-bootstrap";
 import React, { useState } from "react";
-import { apiCreateNewEvent, fetchUserData } from "../../api";
-import Datetime from "react-datetime";
-import { useHistory } from "react-router-dom";
+import DateTimePicker from "react-datetime-picker";
+import { useParams } from "react-router-dom";
 
-function New() {
+function EditEvent() {
+  const { id } = useParams();
+
   return (
     <Row>
       <Col>
         <Row>
           <Col className="my-5">
-            <h1>New Event</h1>
+            <h1>Edit Event</h1>
           </Col>
         </Row>
-        <NewEventForm />
+        <EditEventForm />
       </Col>
     </Row>
   );
 }
 
-function NewEventForm() {
-  // For redirection
-  const history = useHistory();
-
-  // Controlled form state
+function EditEventForm() {
+  const [value, onChange] = useState(new Date());
   const [newEvent, setEvent] = useState({
     name: "",
     description: "",
-    date: new Date(),
   });
 
-  // Triggers POST to create an event
-  function createNewEvent(ev) {
+  function editEvent(ev) {
     ev.preventDefault();
-    console.log("Submit");
-
-    // POST request to the API
-    apiCreateNewEvent(newEvent).then((eventId) => {
-      if (eventId) {
-        // If the event was successfully created, navigate to the event's page
-        console.log("Event created");
-
-        // Refetch the user data
-        const userDataSuccess = fetchUserData();
-
-        if (userDataSuccess) {
-          history.push("/events/" + eventId);
-        }
-      } else {
-        console.log("Event not created");
-        history.push("/events/new");
-      }
-    });
   }
 
-  // Controlled form
   return (
     <Row>
       <Col className="col-lg-9 col-md-12">
-        <Form onSubmit={createNewEvent}>
+        <Form onSubmit={editEvent}>
           <Form.Group controlId="formBasicText">
             <Form.Label>Name</Form.Label>
             <Form.Control
@@ -86,13 +62,7 @@ function NewEventForm() {
 
           <Form.Group controlId="formDate">
             <Form.Label className="mx-2">Date: </Form.Label>
-            <Datetime
-              initialValue={new Date()}
-              value={newEvent.date}
-              onChange={(date) => {
-                setEvent({ ...newEvent, date: date.toDate() });
-              }}
-            />
+            <DateTimePicker onChange={onChange} value={value} />
           </Form.Group>
 
           <Button variant="primary" type="submit">
@@ -104,4 +74,4 @@ function NewEventForm() {
   );
 }
 
-export default New;
+export default EditEvent;

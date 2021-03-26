@@ -15,14 +15,19 @@ import { useParams, useHistory, NavLink } from "react-router-dom";
 function ShowEvent(props) {
   // Redirection and url paramater hooks
   const history = useHistory();
-  const { eventId } = useParams();
+  const { id } = useParams();
+
+  console.log(id);
 
   const { events, session } = props;
-  const event = events.filter((event) => event.id == eventId)[0];
+  const event = events.filter((event) => {
+    console.log("event id", event.data.id, id);
+    return event.data.id == id;
+  })[0];
 
   // If event hasn't been fetched yet
   if (!event || event === undefined) {
-    history.push("/users/show");
+    // history.push("/users/show");
     return <p>Loading</p>;
   }
 
@@ -31,7 +36,7 @@ function ShowEvent(props) {
   const invites = eventData.invites.data;
   const comments = eventData.comments.data;
   const isOwner = session.id === ownerData.id;
-  const editPath = "/events/" + eventId + "/edit";
+  const editPath = "/events/" + eventData.id + "/edit";
   console.log(eventData);
 
   // If Owner, then provide invite link and input box

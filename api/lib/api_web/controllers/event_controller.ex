@@ -12,7 +12,15 @@ defmodule ApiWeb.EventController do
   end
 
   def create(conn, %{"event" => event_params}) do
+    date_str = event_params["date"]
+    parsed_date_str = ApiWeb.ControllerHelpers.parse_datetime(date_str)
+    IO.inspect parsed_date_str
+
+    event_params = event_params
+    |> Map.replace("date", parsed_date_str)
+
     with {:ok, %Event{} = event} <- Events.create_event(event_params) do
+      event = Events.get_event(event.id)
       conn
       |> put_status(:created)
       |> put_resp_header("location", Routes.event_path(conn, :show, event))
