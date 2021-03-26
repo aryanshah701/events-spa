@@ -121,6 +121,61 @@ function getRegisterationError(response) {
 // Fetch all user data and dispatch it to the store
 export function fetchUserData() {
   const state = store.getState();
-  const userId = state.session.id;
-  getRequest("/users/" + userId);
+  const session = state.session;
+
+  // If the user is not logged in, dispatch error
+  if (!session) {
+    const errorAction = {
+      type: "error/set",
+      data: "Sorry you need to be logged in for this.",
+    };
+
+    store.dispatch(errorAction);
+    return false;
+  }
+
+  const userId = session.id;
+  const token = session.token;
+
+  // Make the post request and dispatch the data if successful
+  const isSuccess = getRequest("/users/" + userId, token)
+    .then((userData) => {
+      const action = {
+        type: "user/set",
+        data: userData,
+      };
+
+      store.dispatch(action);
+
+      return true;
+    })
+    .catch((err) => {
+      console.log("err", err);
+      return false;
+    });
+
+  return isSuccess;
+}
+
+// Fetch all the events the user is authorised to see
+export function fetchEvents() {}
+
+export async function fetchEventData(eventId) {
+  const state = store.getState();
+  const session = state.session;
+
+  // If the user is not logged in, dispatch error
+  if (!session) {
+    const errorAction = {
+      type: "error/set",
+      data: "Sorry you need to be logged in for this.",
+    };
+
+    store.dispatch(errorAction);
+    return null;
+  }
+
+  // If the user is logged in, attempt to fetch the event data
+  const token = state.session.token;
+  return await getRequest("/events/" + eventId, token);
 }

@@ -30,7 +30,7 @@ function NavBar(props) {
         <Row>
           <Col>
             <Nav as="ul">
-              <AuthenticationInfo />
+              <NavInfo />
             </Nav>
           </Col>
         </Row>
@@ -40,7 +40,7 @@ function NavBar(props) {
 }
 
 // Login/Register, or Logout component based on whether the user is authenticated or not
-const AuthenticationInfo = connect(stateToProps)(({ session }) => {
+const NavInfo = connect(stateToProps)(({ session }) => {
   if (!session) {
     return (
       <Row>
@@ -58,6 +58,7 @@ const AuthenticationInfo = connect(stateToProps)(({ session }) => {
     );
   } else {
     const userShowPath = "/users/show";
+    const eventNewPath = "/events/new";
     return (
       <Row>
         <Nav.Item>
@@ -66,6 +67,11 @@ const AuthenticationInfo = connect(stateToProps)(({ session }) => {
           </NavLink>
         </Nav.Item>
         <LogoutButton />
+        <Nav.Item>
+          <NavLink to={eventNewPath} className="nav-link">
+            Create New Event
+          </NavLink>
+        </Nav.Item>
       </Row>
     );
   }

@@ -8,6 +8,8 @@ import NavBar from "./Components/Nav";
 import ShowUser from "./Components/Users/Show";
 import NewUser from "./Components/Users/New";
 import LoginUser from "./Components/Users/Login";
+import ShowEvent from "./Components/Events/Show";
+import NewEvent from "./Components/Events/New";
 
 export default function App() {
   return (
@@ -25,6 +27,12 @@ export default function App() {
         </Route>
         <Route path="/login" exact>
           <LoginUser />
+        </Route>
+        <Route path="/events/new" exact>
+          <NewEvent />
+        </Route>
+        <Route path="/events/:id">
+          <ShowEvent />
         </Route>
       </Switch>
     </Container>

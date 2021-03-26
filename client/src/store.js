@@ -23,6 +23,16 @@ function users(state = [], action) {
   }
 }
 
+// User reducer(authenticated user data)
+function user(state = null, action) {
+  switch (action.type) {
+    case "user/set":
+      return action.data;
+    default:
+      return state;
+  }
+}
+
 // Loads session from local storage if it exists
 function loadSession() {
   let session = localStorage.getItem("session");
@@ -94,6 +104,7 @@ function rootReducer(state, action) {
   const reducers = combineReducers({
     users,
     events,
+    user,
     session,
     error,
     success,

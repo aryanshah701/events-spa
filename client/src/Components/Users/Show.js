@@ -1,11 +1,9 @@
 // Show page for a user
 import { Row, Col, ListGroup } from "react-bootstrap";
 import { connect } from "react-redux";
-import { useHistory, NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 function ShowUser(props) {
-  // For redirection
-  const history = useHistory();
   const { user } = props;
 
   // If the user data wasn't loaded successfully
@@ -53,14 +51,12 @@ function UserInfo({ userData, eventData }) {
 }
 
 function Events({ eventData }) {
-  const events = eventData.map((event) => {
+  const events = eventData.map((event, idx) => {
     const eventPath = "/events/" + event.id;
     return (
-      <ListGroup>
-        <ListGroup.Item>
-          <NavLink to={eventPath}>{event.name}</NavLink>
-        </ListGroup.Item>
-      </ListGroup>
+      <ListGroup.Item key={idx}>
+        <NavLink to={eventPath}>{event.name}</NavLink>
+      </ListGroup.Item>
     );
   });
 
@@ -73,7 +69,14 @@ function Events({ eventData }) {
           </Col>
         </Row>
         <Row>
-          <Col>{events}</Col>
+          <Col>
+            <ListGroup>{events}</ListGroup>
+          </Col>
+        </Row>
+        <Row className="my-2">
+          <Col>
+            <NavLink to={"/events/new"}>Create New Event</NavLink>
+          </Col>
         </Row>
       </Col>
     </Row>
@@ -81,28 +84,17 @@ function Events({ eventData }) {
 }
 
 function Comments({ commentData }) {
-  const comments = commentData.map((comment) => {
+  const comments = commentData.map((comment, idx) => {
     const eventPath = "/events/" + comment.event_id;
     return (
-      <Row className="my-4">
-        <Col>
-          <Row>
-            <Col>
-              <h2>Activity</h2>
-            </Col>
-          </Row>
-          <ListGroup>
-            <ListGroup.Item>
-              <NavLink to={eventPath}>{comment.content}</NavLink>
-            </ListGroup.Item>
-          </ListGroup>
-        </Col>
-      </Row>
+      <ListGroup.Item key={idx}>
+        <NavLink to={eventPath}>{comment.content}</NavLink>
+      </ListGroup.Item>
     );
   });
 
   return (
-    <Row>
+    <Row className="my-4">
       <Col>
         <Row>
           <Col>
@@ -110,7 +102,9 @@ function Comments({ commentData }) {
           </Col>
         </Row>
         <Row>
-          <Col>{comments}</Col>
+          <Col>
+            <ListGroup>{comments}</ListGroup>
+          </Col>
         </Row>
       </Col>
     </Row>
