@@ -40,6 +40,7 @@ defmodule Api.Events do
     event = event 
     |> Repo.preload(:comments)
     |> load_stats()
+    |> Repo.preload(:invites)
     |> Repo.preload(:user)
     event
   end
@@ -51,6 +52,7 @@ defmodule Api.Events do
       event = event 
       |> Repo.preload(:comments)
       |> load_stats()
+      |> Repo.preload(:invites)
       |> Repo.preload(:user)
 
       event  

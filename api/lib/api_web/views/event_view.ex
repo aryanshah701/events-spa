@@ -17,6 +17,7 @@ defmodule ApiWeb.EventView do
   def render("event.json", %{event: event}) do
     comments_json = ApiWeb.CommentView.render("index.json", comments: event.comments)
     user_json = ApiWeb.UserView.render("show_without_assoc.json", user: event.user)
+    invite_json = ApiWeb.InviteView.render("index.json", invites: event.invites)
 
     %{id: event.id,
       name: event.name,
@@ -27,8 +28,9 @@ defmodule ApiWeb.EventView do
       num_yes: event.num_yes,
       num_maybe: event.num_maybe,
       num_no_response: event.num_no_response,
-      comments_json: comments_json,
-      user_json: user_json
+      comments: comments_json,
+      invites: invite_json,
+      user: user_json
       }
   end
 

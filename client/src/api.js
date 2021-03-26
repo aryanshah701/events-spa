@@ -137,13 +137,76 @@ export function fetchUserData() {
   const userId = session.id;
   const token = session.token;
 
-  // Make the post request and dispatch the data if successful
+  // Make the get request and dispatch the data if successful
   const isSuccess = getRequest("/users/" + userId, token)
     .then((userData) => {
       const action = {
         type: "user/set",
         data: userData,
       };
+
+      store.dispatch(action);
+
+      // Fetch the user's events
+      const eventsFetched = fetchEvents();
+
+      return eventsFetched;
+    })
+    .catch((err) => {
+      console.log("err", err);
+      return false;
+    });
+
+  return isSuccess;
+}
+
+// Fetch all the events the user is authorised to see
+export function fetchEvents() {
+  let state = store.getState();
+  const session = state.session;
+
+  // If the user is not logged in, dispatch error
+  if (!session) {
+    const errorAction = {
+      type: "error/set",
+      data: "Sorry you need to be logged in for this.",
+    };
+
+    store.dispatch(errorAction);
+    return false;
+  }
+
+  console.log("State", state);
+
+  if (!state.user) {
+    return false;
+  }
+
+  // If the user is logged in, fetch the event info for all events
+  const user = state.user.data;
+  const token = session.token;
+  const events = user.events.data;
+  let isSuccess = true;
+
+  console.log("Fetching all events(API)", events);
+  for (const eventData of events) {
+    const fetchSuccess = fetchEventData(eventData.id, token);
+    isSuccess = isSuccess && fetchSuccess;
+  }
+
+  return isSuccess;
+}
+
+export function fetchEventData(eventId, token) {
+  // Make the get request and dispatch the data if successful
+  const isSuccess = getRequest("/events/" + eventId, token)
+    .then((eventData) => {
+      const action = {
+        type: "events/add",
+        data: eventData,
+      };
+
+      console.log("Fetched event data", eventData);
 
       store.dispatch(action);
 
@@ -157,25 +220,6 @@ export function fetchUserData() {
   return isSuccess;
 }
 
-// Fetch all the events the user is authorised to see
-export function fetchEvents() {}
-
-export async function fetchEventData(eventId) {
-  const state = store.getState();
-  const session = state.session;
-
-  // If the user is not logged in, dispatch error
-  if (!session) {
-    const errorAction = {
-      type: "error/set",
-      data: "Sorry you need to be logged in for this.",
-    };
-
-    store.dispatch(errorAction);
-    return null;
-  }
-
-  // If the user is logged in, attempt to fetch the event data
-  const token = state.session.token;
-  return await getRequest("/events/" + eventId, token);
+export function fetchData() {
+  fetchUserData();
 }

@@ -8,6 +8,9 @@ function events(state = [], action) {
   switch (action.type) {
     case "events/set":
       return action.data;
+    case "events/add":
+      const newState = state.concat([action.data]);
+      return newState;
     default:
       return state;
   }
