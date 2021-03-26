@@ -1,6 +1,15 @@
-import { Row, Col, Badge, Button, ListGroup } from "react-bootstrap";
+import {
+  Row,
+  Col,
+  Badge,
+  Button,
+  ListGroup,
+  InputGroup,
+  FormControl,
+  Table,
+} from "react-bootstrap";
 import { connect } from "react-redux";
-import { useParams, useHistory } from "react-router-dom";
+import { useParams, useHistory, NavLink } from "react-router-dom";
 
 // The Event Show page
 function ShowEvent(props) {
@@ -22,12 +31,15 @@ function ShowEvent(props) {
   const invites = eventData.invites.data;
   const comments = eventData.comments.data;
   const isOwner = session.id === ownerData.id;
+  const editPath = "/events/" + eventId + "/edit";
   console.log(eventData);
 
   // If Owner, then provide invite link and input box
   let inviteForm = null;
+  let editLink = null;
   if (isOwner) {
     inviteForm = <InviteForm event={eventData} />;
+    editLink = <NavLink to={editPath}>Edit Event</NavLink>;
   }
 
   // If not Owner, then provide invite response options
@@ -48,7 +60,11 @@ function ShowEvent(props) {
           <Col>
             <Row>
               <Col>
-                <EventInfo event={eventData} owner={ownerData} />
+                <EventInfo
+                  event={eventData}
+                  owner={ownerData}
+                  editLink={editLink}
+                />
               </Col>
             </Row>
             <Row>
@@ -63,8 +79,13 @@ function ShowEvent(props) {
               <Col>{inviteForm}</Col>
             </Row>
           </Col>
-          <Col className="col-lg-4 col-md-12">
+          <Col className="col-lg-4 col-md-12 mx-2">
             <InviteList invites={invites} />
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <Comments comments={comments} />
           </Col>
         </Row>
       </Col>
@@ -72,7 +93,7 @@ function ShowEvent(props) {
   );
 }
 
-function EventInfo({ event, owner }) {
+function EventInfo({ event, owner, editLink }) {
   function cleanDate(date) {
     const dateInfo = date.split("T");
     const dateDate = dateInfo[0];
@@ -113,6 +134,9 @@ function EventInfo({ event, owner }) {
               {owner.email}
             </p>
           </Col>
+        </Row>
+        <Row>
+          <Col>{editLink}</Col>
         </Row>
       </Col>
     </Row>
@@ -198,9 +222,59 @@ function InviteList({ invites }) {
 
 function InviteForm({ event }) {
   return (
-    <Row>
+    <Row className="my-3">
+      <Col className="col-lg-9 col-md-12">
+        <Row className="my-3">
+          <Col>
+            <h4>Invite Someone!</h4>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <InputGroup className="mb-3">
+              <FormControl
+                placeholder="Invite's email"
+                aria-label="Invite's email"
+                aria-describedby="basic-addon2"
+              />
+            </InputGroup>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <Button variant="primary">Invite</Button>
+          </Col>
+        </Row>
+      </Col>
+    </Row>
+  );
+}
+
+function Comments({ comments }) {
+  const commentList = comments.map((comment, idx) => {
+    return (
+      <tr key={idx}>
+        <td>{comment.content}</td>
+        <td>{comment.user}</td>
+      </tr>
+    );
+  });
+
+  return (
+    <Row className="my-4">
       <Col>
-        <h2>This is the invite form</h2>
+        <Row>
+          <Col>
+            <h2>Comments</h2>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <Table bordered hover>
+              <tbody>{commentList}</tbody>
+            </Table>
+          </Col>
+        </Row>
       </Col>
     </Row>
   );
