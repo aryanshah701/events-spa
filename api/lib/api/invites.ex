@@ -39,8 +39,9 @@ defmodule Api.Invites do
 
   def load_invite(%Invite{} = invite) do
     invite = Repo.preload(invite, :event)
-    event = Api.Events.load_stats(invite.event)
-    %{invite | event: event}
+    event = Api.Events.get_event(invite.event_id)
+    invite = Map.replace(invite, :event, event)
+    invite
   end
 
   @doc """
@@ -60,7 +61,7 @@ defmodule Api.Invites do
     |> Invite.changeset(attrs)
     |> Repo.insert(
       on_conflict: :replace_all,
-      conflict_target: [:user_email, :event_id]
+      conflict_target: [:email, :event_id]
     )
   end
 

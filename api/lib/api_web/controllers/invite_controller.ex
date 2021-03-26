@@ -3,8 +3,11 @@ defmodule ApiWeb.InviteController do
 
   alias Api.Invites
   alias Api.Invites.Invite
+  alias ApiWeb.Plugs
 
   action_fallback ApiWeb.FallbackController
+
+  plug Plugs.RequireAuth, "en" when action in [:index, :create, :show, :update, :delete]
 
   def index(conn, _params) do
     invites = Invites.list_invites()
@@ -12,9 +15,11 @@ defmodule ApiWeb.InviteController do
   end
 
   def create(conn, %{"invite" => invite_params}) do
+    invite_params = invite_params
+    |> Map.put("response", "no response")
+
     with {:ok, %Invite{} = invite} <- Invites.create_invite(invite_params) do
       invite = Api.Invites.load_invite(invite)
-      
       conn
       |> put_status(:created)
       |> put_resp_header("location", Routes.invite_path(conn, :show, invite))

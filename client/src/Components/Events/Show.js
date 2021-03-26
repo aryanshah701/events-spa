@@ -10,6 +10,8 @@ import {
 } from "react-bootstrap";
 import { connect } from "react-redux";
 import { useParams, useHistory, NavLink } from "react-router-dom";
+import { useState } from "react";
+import { apiPostInvite } from "../../api";
 
 // The Event Show page
 function ShowEvent(props) {
@@ -17,11 +19,8 @@ function ShowEvent(props) {
   const history = useHistory();
   const { id } = useParams();
 
-  console.log(id);
-
   const { events, session } = props;
   const event = events.filter((event) => {
-    console.log("event id", event.data.id, id);
     return event.data.id == id;
   })[0];
 
@@ -37,13 +36,12 @@ function ShowEvent(props) {
   const comments = eventData.comments.data;
   const isOwner = session.id === ownerData.id;
   const editPath = "/events/" + eventData.id + "/edit";
-  console.log(eventData);
 
   // If Owner, then provide invite link and input box
   let inviteForm = null;
   let editLink = null;
   if (isOwner) {
-    inviteForm = <InviteForm event={eventData} />;
+    inviteForm = <InviteForm event={eventData} history={history} />;
     editLink = <NavLink to={editPath}>Edit Event</NavLink>;
   }
 
@@ -206,8 +204,7 @@ function InviteList({ invites }) {
   const inviteList = invites.map((invite, idx) => {
     return (
       <ListGroup.Item key={idx}>
-        <Col>{invite.email}</Col>
-        <Col>{invite.response}</Col>
+        {invite.email}: {invite.response}
       </ListGroup.Item>
     );
   });
@@ -219,13 +216,29 @@ function InviteList({ invites }) {
             <h2>Invites</h2>
           </Col>
         </Row>
-        <Row>{inviteList}</Row>
+        <Row>
+          <ListGroup>{inviteList}</ListGroup>
+        </Row>
       </Col>
     </Row>
   );
 }
 
-function InviteForm({ event }) {
+function InviteForm({ event, history }) {
+  // Controlled invite form
+  const [invite, setInvite] = useState("");
+
+  // Submits the invite
+  function submitInvite() {
+    console.log("submit", invite);
+
+    // Post the invite
+    apiPostInvite(invite, event.id).then((_success) => {
+      // Refresh the page with upadted event or error message
+      history.push("/events/" + event.id);
+    });
+  }
+
   return (
     <Row className="my-3">
       <Col className="col-lg-9 col-md-12">
@@ -241,13 +254,22 @@ function InviteForm({ event }) {
                 placeholder="Invite's email"
                 aria-label="Invite's email"
                 aria-describedby="basic-addon2"
+                value={invite}
+                onChange={(ev) => setInvite(ev.target.value)}
+                onKeyPress={(ev) => {
+                  if (ev.key == "Enter") {
+                    submitInvite();
+                  }
+                }}
               />
             </InputGroup>
           </Col>
         </Row>
         <Row>
           <Col>
-            <Button variant="primary">Invite</Button>
+            <Button variant="primary" onClick={submitInvite}>
+              Invite
+            </Button>
           </Col>
         </Row>
       </Col>
@@ -287,7 +309,6 @@ function Comments({ comments }) {
 
 function stateToProps(state) {
   // Find the right event and return it's information
-  console.log("Show events page state: ", state);
   const { events, session } = state;
   return { events: events, session: session };
 }

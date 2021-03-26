@@ -1,3 +1,4 @@
+import { findIndex } from "lodash";
 // Design of functions taken from Tuck notes 0323 store.js
 
 // File for redux reducer functions
@@ -9,11 +10,33 @@ function events(state = [], action) {
     case "events/set":
       return action.data;
     case "events/add":
-      const newState = state.concat([action.data]);
-      return newState;
+      const newStateAdd = state.concat([action.data]);
+      return newStateAdd;
+    case "events/update":
+      const newStateUpdate = replaceEvent(state, action.data);
+      console.log("updated events", newStateUpdate);
+      return newStateUpdate;
     default:
       return state;
   }
+}
+
+// Replace an event with the given state with the given event
+function replaceEvent(state, newEvent) {
+  // Clone the state to prevent mutating
+  const clonedState = state.slice();
+
+  // Find the index of the event that needs to be replaced
+  const index = clonedState.findIndex(
+    (event) => event.data.id === newEvent.data.id
+  );
+
+  console.log("replace idx", index);
+
+  // Replace the event
+  clonedState.splice(index, 1, newEvent);
+
+  return clonedState;
 }
 
 // Users reducer

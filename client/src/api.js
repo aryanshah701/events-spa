@@ -6,6 +6,7 @@ const apiUrl =
     ? "https://events-api.aryanshah.tech/api/v1"
     : "http://localhost:4000/api/v1";
 
+// ---------------------- POST REQUESTS ----------------------------
 async function postRequest(endpoint, body, token = "") {
   const options = {
     method: "POST",
@@ -19,19 +20,6 @@ async function postRequest(endpoint, body, token = "") {
   const response = await fetch(apiUrl + endpoint, options);
 
   return await response.json();
-}
-
-async function getRequest(endpoint, token) {
-  const options = {
-    method: "GET",
-    headers: {
-      "x-auth": token,
-    },
-  };
-
-  const repsonse = await fetch(apiUrl + endpoint, options);
-
-  return await repsonse.json();
 }
 
 // Authenticate the user and recieve the session token
@@ -119,6 +107,143 @@ function getRegisterationError(response) {
   }
 }
 
+export async function apiCreateNewEvent(event) {
+  // Get the user id from the session and at it to the event
+  const state = store.getState();
+  const session = state.session;
+
+  // Ensure that the user is logged in
+  if (!isLoggedIn(session)) {
+    return null;
+  }
+
+  const token = session.token;
+  const userId = session.id;
+
+  const newEvent = {
+    ...event,
+    user_id: userId,
+  };
+
+  const eventId = postRequest("/events", { event: newEvent }, token).then(
+    (response) => {
+      if (response.data) {
+        // Event creation was successful
+        console.log(response.data);
+        return response.data.id;
+      } else {
+        // If the event creation is not successful, dispatch an error
+        const err = getEventCreateError(response.errors);
+
+        if (err !== "") {
+          const errorAction = {
+            data: err,
+            type: "error/set",
+          };
+
+          store.dispatch(errorAction);
+        }
+
+        return null;
+      }
+    }
+  );
+
+  return eventId;
+}
+
+// Event error to string
+function getEventCreateError(errors) {
+  if (errors.description) {
+    return "Description: " + errors.description[0];
+  }
+
+  if (errors.name) {
+    return "Name: " + errors.name[0];
+  }
+
+  if (errors.date) {
+    return "Date: " + errors.date[0];
+  }
+}
+
+export async function apiPostInvite(invite_email, event_id) {
+  // Ensure that the user is logged in
+  const state = store.getState();
+  const session = state.session;
+
+  // Ensure that the user is logged in
+  if (!isLoggedIn(session)) {
+    return false;
+  }
+
+  const token = session.token;
+  const invite = { email: invite_email, event_id: event_id };
+
+  console.log("token", token);
+
+  const response = postRequest("/invites", { invite: invite }, token).then(
+    (response) => {
+      if (response.data) {
+        // Invite creation was successful so dispatch the updated event
+        const newEvent = response.data.event;
+        const updateEventAction = {
+          data: newEvent,
+          type: "events/update",
+        };
+        store.dispatch(updateEventAction);
+        return true;
+      } else {
+        // If the invite creation is not successful, dispatch an error
+        const err = getInviteCreateError(response.errors);
+
+        if (err !== "") {
+          const errorAction = {
+            data: err,
+            type: "error/set",
+          };
+
+          store.dispatch(errorAction);
+        }
+
+        return false;
+      }
+    }
+  );
+
+  return response;
+}
+
+// Invite error to string
+function getInviteCreateError(errors) {
+  if (errors.email) {
+    return "Email: " + errors.email[0];
+  }
+
+  if (errors.event_id) {
+    return "Event: " + errors.event_id[0];
+  }
+
+  if (errors.response) {
+    return "Response: " + errors.response[0];
+  }
+}
+
+// --------------------- GET REQUESTS -----------------------------
+
+async function getRequest(endpoint, token) {
+  const options = {
+    method: "GET",
+    headers: {
+      "x-auth": token,
+    },
+  };
+
+  const repsonse = await fetch(apiUrl + endpoint, options);
+
+  return await repsonse.json();
+}
+
 // Fetch all user data and dispatch it to the store
 export function fetchUserData() {
   const state = store.getState();
@@ -165,8 +290,6 @@ export function fetchEvents() {
     return false;
   }
 
-  console.log("State", state);
-
   if (!state.user) {
     return false;
   }
@@ -177,7 +300,6 @@ export function fetchEvents() {
   const events = user.events.data;
   let isSuccess = true;
 
-  console.log("Fetching all events(API)", events);
   for (const eventData of events) {
     const fetchSuccess = fetchEventData(eventData.id, token);
     isSuccess = isSuccess && fetchSuccess;
@@ -210,8 +332,6 @@ export function fetchEventData(eventId, token) {
         data: eventData,
       };
 
-      console.log("Fetched event data", eventData);
-
       store.dispatch(action);
 
       return true;
@@ -222,65 +342,6 @@ export function fetchEventData(eventId, token) {
     });
 
   return isSuccess;
-}
-
-export async function apiCreateNewEvent(event) {
-  // Get the user id from the session and at it to the event
-  const state = store.getState();
-  const session = state.session;
-
-  // Ensure that the user is logged in
-  if (!isLoggedIn(session)) {
-    return null;
-  }
-
-  const token = session.token;
-  const userId = session.id;
-
-  const newEvent = {
-    ...event,
-    user_id: userId,
-  };
-
-  const isSuccess = postRequest("/events", { event: newEvent }, token).then(
-    (response) => {
-      if (response.data) {
-        // Event creation was successful
-        console.log(response.data);
-        return response.data.id;
-      } else {
-        // If the event creation is not successful, dispatch an error
-        const err = getEventCreateError(response.errors);
-
-        if (err !== "") {
-          const errorAction = {
-            data: err,
-            type: "error/set",
-          };
-
-          store.dispatch(errorAction);
-        }
-
-        return null;
-      }
-    }
-  );
-
-  return isSuccess;
-}
-
-function getEventCreateError(errors) {
-  if (errors.description) {
-    return "Description: " + errors.description[0];
-  }
-
-  if (errors.name) {
-    return "Name: " + errors.name[0];
-  }
-
-  if (errors.date) {
-    return "Date: " + errors.date[0];
-  }
 }
 
 export function fetchData() {

@@ -24,8 +24,8 @@ defmodule Api.Invites.Invite do
   def validate_response(changeset, field, options \\ []) do
     validate_change(changeset, field, fn _, response ->
       response = String.downcase(response)
-      if response != "yes" && response != "no" && response != "maybe" do
-        [{field, options[:message] || "Invalid response string. Should be one of yes, no or maybe"}]
+      if response != "yes" && response != "no" && response != "maybe" && response != "no response" do
+        [{field, options[:message] || "Invalid response string. Should be one of yes, no, maybe, or no response"}]
       else
         []
       end

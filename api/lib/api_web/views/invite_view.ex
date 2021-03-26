@@ -3,7 +3,7 @@ defmodule ApiWeb.InviteView do
   alias ApiWeb.InviteView
 
   def render("index.json", %{invites: invites}) do
-    %{data: render_many(invites, InviteView, "invite.json")}
+    %{data: render_many(invites, InviteView, "invite_without_assoc.json")}
   end
 
   def render("show.json", %{invite: invite}) do
@@ -11,12 +11,19 @@ defmodule ApiWeb.InviteView do
   end
 
   def render("invite.json", %{invite: invite}) do
-    event_json = ApiWeb.EventView.render("show_without_assoc.json", invite.event)
+    event_json = ApiWeb.EventView.render("show.json", event: invite.event)
 
     %{id: invite.id,
       response: invite.response,
       event: event_json,
       email: invite.email,
       }
+  end
+
+  def render("invite_without_assoc.json", %{invite: invite}) do
+    %{id: invite.id,
+      response: invite.response,
+      email: invite.email,
+    }
   end
 end
