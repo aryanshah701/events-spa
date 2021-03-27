@@ -130,7 +130,6 @@ function Comments({ commentData }) {
 
 function stateToProps(state) {
   let { user, events } = state;
-  console.log(events);
   return { user: user, events: events };
 }
 

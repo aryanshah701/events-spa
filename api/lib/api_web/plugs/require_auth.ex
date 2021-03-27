@@ -11,7 +11,7 @@ defmodule ApiWeb.Plugs.RequireAuth do
           token, max_age: 86400) do
       {:ok, user_id} ->
         user = Api.Users.get_user!(user_id)
-        assign(conn, :current_user, user)
+        assign(conn, :user, user)
       {:error, err} ->
         conn
         |> put_resp_header(

@@ -39,6 +39,20 @@ defmodule Api.Comments do
     comment = Repo.get!(Comment, id)
     |> Repo.preload(:user)
     |> Repo.preload(:event)
+
+    event = Api.Events.get_event(comment.event_id)
+    comment = Map.replace(comment, :event, event)
+    
+    comment
+  end
+
+  def get_comment(id) do
+    comment = Repo.get(Comment, id)
+    |> Repo.preload(:user)
+    |> Repo.preload(:event)
+
+    event = Api.Events.get_event(comment.event_id)
+    comment = Map.replace(comment, :event, event)
     
     comment
   end

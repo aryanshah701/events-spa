@@ -11,7 +11,7 @@ import {
 import { connect } from "react-redux";
 import { useParams, useHistory, NavLink } from "react-router-dom";
 import { useState } from "react";
-import { apiPostInvite } from "../../api";
+import { apiPostInvite, apiPostComment, apiDeleteComment } from "../../api";
 
 // The Event Show page
 function ShowEvent(props) {
@@ -96,7 +96,7 @@ function ShowEvent(props) {
         </Row>
         <Row>
           <Col>
-            <Comments comments={comments} />
+            <Comments comments={comments} event={eventData} history={history} />
           </Col>
         </Row>
       </Col>
@@ -260,8 +260,6 @@ function InviteForm({ event, history }) {
 
   // Submits the invite
   function submitInvite() {
-    console.log("submit", invite);
-
     // Post the invite
     apiPostInvite(invite, event.id).then((_success) => {
       // Refresh the page with upadted event or error message
@@ -307,12 +305,33 @@ function InviteForm({ event, history }) {
   );
 }
 
-function Comments({ comments }) {
+// Comments display UI
+function Comments({ comments, event, history }) {
+  // To delete a comment
+  function deleteComment(commentId) {
+    apiDeleteComment(commentId).then((_success) => {
+      // Rerender the page to update the comments
+      history.push("/events/" + event.id);
+    });
+  }
+
   const commentList = comments.map((comment, idx) => {
     return (
       <tr key={idx}>
-        <td>{comment.content}</td>
-        <td>{comment.user}</td>
+        <td className="col-lg-6">{comment.content}</td>
+        <td className="col-lg-3">
+          <Badge variant="info">by {comment.user}</Badge>
+        </td>
+        <td className="col-lg-3">
+          <button
+            className="btn btn-link text-danger"
+            onClick={() => {
+              deleteComment(comment.id);
+            }}
+          >
+            Delete
+          </button>
+        </td>
       </tr>
     );
   });
@@ -325,11 +344,58 @@ function Comments({ comments }) {
             <h2>Comments</h2>
           </Col>
         </Row>
+        <CommentForm event={event} history={history} />
         <Row>
           <Col>
-            <Table bordered hover>
+            <Table hover>
               <tbody>{commentList}</tbody>
             </Table>
+          </Col>
+        </Row>
+      </Col>
+    </Row>
+  );
+}
+
+function CommentForm({ event, history }) {
+  // Controlled comment form
+  const [comment, setComment] = useState("");
+
+  // Submits the comment
+  function submitComment() {
+    // Post the invite
+    apiPostComment(comment, event.id).then((_success) => {
+      // Refresh the page with upadated event or error message
+      history.push("/events/" + event.id);
+    });
+  }
+
+  return (
+    <Row className="my-3">
+      <Col className="col-lg-9 col-md-12">
+        <Row>
+          <Col>
+            <InputGroup className="mb-3">
+              <FormControl
+                placeholder="Comment"
+                aria-label="Comment"
+                aria-describedby="basic-addon2"
+                value={comment}
+                onChange={(ev) => setComment(ev.target.value)}
+                onKeyPress={(ev) => {
+                  if (ev.key === "Enter") {
+                    submitComment();
+                  }
+                }}
+              />
+            </InputGroup>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <Button variant="primary" onClick={submitComment}>
+              Comment
+            </Button>
           </Col>
         </Row>
       </Col>

@@ -239,6 +239,73 @@ function getInviteCreateError(errors) {
   }
 }
 
+// Post a new comment
+export async function apiPostComment(content, eventId) {
+  // Ensure that the user is logged in
+  const state = store.getState();
+  const session = state.session;
+
+  if (!isLoggedIn(session)) {
+    return false;
+  }
+
+  const token = session.token;
+
+  const comment = {
+    content: content,
+    event_id: eventId,
+  };
+
+  const response = postRequest("/comments", { comment: comment }, token).then(
+    (response) => {
+      if (response.data) {
+        // Comment creation was successful so dispatch the updated event
+        const newEvent = response.data.event;
+        const updateEventAction = {
+          data: newEvent,
+          type: "events/update",
+        };
+        store.dispatch(updateEventAction);
+        return true;
+      } else {
+        // If the comment creation is not successful, dispatch an error
+        const err = getCommentCreateError(response.errors);
+
+        if (err !== "") {
+          const errorAction = {
+            data: err,
+            type: "error/set",
+          };
+
+          store.dispatch(errorAction);
+        }
+
+        return false;
+      }
+    }
+  );
+
+  return response;
+}
+
+// Comment error to string
+function getCommentCreateError(errors) {
+  if (errors.content) {
+    return "Content: " + errors.content[0];
+  }
+
+  if (errors.event_id) {
+    return "Event: " + errors.event_id[0];
+  }
+
+  if (errors.user_id) {
+    return "User: " + errors.user_id[0];
+  }
+}
+
+// --------------------- DELETE REQUESTS --------------------------
+export async function apiDeleteComment() {}
+
 // --------------------- GET REQUESTS -----------------------------
 
 async function getRequest(endpoint, token) {
