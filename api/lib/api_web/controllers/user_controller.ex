@@ -3,8 +3,11 @@ defmodule ApiWeb.UserController do
 
   alias Api.Users
   alias Api.Users.User
+  alias ApiWeb.Plugs
 
   action_fallback ApiWeb.FallbackController
+
+  plug Plugs.RequireAuth, "en" when action in [:index, :show, :update, :delete]
 
   def index(conn, _params) do
     users = Users.list_users()

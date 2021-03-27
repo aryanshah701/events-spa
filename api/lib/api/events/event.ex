@@ -36,7 +36,7 @@ defmodule Api.Events.Event do
 
     validate_change(changeset, field, fn _, date ->
       if date != nil && NaiveDateTime.compare(current_datetime, date) == :gt do
-        [{field, options[:message] || "Invalid date and time"}]
+        [{field, options[:message] || "Please pick a date and time in the future"}]
       else
         []
       end

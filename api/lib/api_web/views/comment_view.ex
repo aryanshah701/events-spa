@@ -26,11 +26,14 @@ defmodule ApiWeb.CommentView do
   end
 
   def render("comment_without_assoc.json", %{comment: comment}) do
-    user_name = Api.Users.get_user(comment.user_id).name
+    user = Api.Users.get_user(comment.user_id)
+    user_name = user.name
+    user_id = user.id
     %{id: comment.id,
       content: comment.content,
       event: comment.event_id,
-      user: user_name
+      user: user_name,
+      user_id: user_id
       }
   end
 end

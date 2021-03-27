@@ -11,7 +11,7 @@ import {
 import { connect } from "react-redux";
 import { useParams, useHistory, NavLink } from "react-router-dom";
 import { useState } from "react";
-import { apiPostInvite, apiPostComment } from "../../api";
+import { apiPostInvite, apiPostComment, apiDeleteComment } from "../../api";
 
 // The Event Show page
 function ShowEvent(props) {
@@ -36,11 +36,12 @@ function ShowEvent(props) {
     );
   }
 
+  const userId = session.id;
   const eventData = event.data;
   const ownerData = eventData.user.data;
   const invites = eventData.invites.data;
   const comments = eventData.comments.data;
-  const isOwner = session.id === ownerData.id;
+  const isOwner = userId === ownerData.id;
   const isInvite = invites.some(
     (invite) => invite.email === session.user_email
   );
@@ -97,7 +98,12 @@ function ShowEvent(props) {
         </Row>
         <Row>
           <Col>
-            <Comments comments={comments} event={eventData} history={history} />
+            <Comments
+              comments={comments}
+              event={eventData}
+              history={history}
+              userId={userId}
+            />
           </Col>
         </Row>
       </Col>
@@ -268,6 +274,9 @@ function InviteForm({ event, history }) {
       // Refresh the page with upadted event or error message
       history.push("/events/" + event.id);
     });
+
+    // Clear the input field
+    setInvite("");
   }
 
   return (
@@ -314,14 +323,47 @@ function InviteForm({ event, history }) {
 }
 
 // Comments display UI
-function Comments({ comments, event, history }) {
+function Comments({ comments, event, history, userId }) {
+  // Deletes the comment
+  function deleteComment(commentId) {
+    apiDeleteComment(commentId).then((success) => {
+      if (success) {
+        window.location.reload();
+        console.log("comment deleted");
+      } else {
+        console.log("comment not deleted");
+      }
+    });
+  }
+
+  // Checks if the logged in owner is authorised
+  function commentOwner(comment) {
+    return userId == comment.user_id || userId === event.user.data.id;
+  }
+
   const commentList = comments.map((comment, idx) => {
+    // If authorised to delete the comment, add delete button
+    let deleteButton = null;
+    if (commentOwner(comment)) {
+      deleteButton = (
+        <td>
+          <button
+            className="btn btn-link text-danger"
+            onClick={() => deleteComment(comment.id)}
+          >
+            Delete
+          </button>
+        </td>
+      );
+    }
+
     return (
       <tr key={idx}>
         <td className="col-lg-6">{comment.content}</td>
         <td className="col-lg-3">
           <Badge variant="info">by {comment.user}</Badge>
         </td>
+        {deleteButton}
       </tr>
     );
   });
@@ -358,6 +400,9 @@ function CommentForm({ event, history }) {
       // Refresh the page with upadated event or error message
       history.push("/events/" + event.id);
     });
+
+    // Clear the input field
+    setComment("");
   }
 
   return (

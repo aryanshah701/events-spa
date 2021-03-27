@@ -129,7 +129,6 @@ export async function apiCreateNewEvent(event) {
     (response) => {
       if (response.data) {
         // Event creation was successful
-        console.log(response.data);
         return response.data.id;
       } else {
         // If the event creation is not successful, dispatch an error
@@ -371,6 +370,57 @@ export async function apiUpdateEvent(event, eventId) {
 
     return false;
   }
+}
+
+// --------------------- DELETE REQUESTS --------------------------
+async function deleteRequest(endpoint, token = "") {
+  const options = {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      "x-auth": token,
+    },
+  };
+
+  const response = await fetch(apiUrl + endpoint, options);
+  return await response.json();
+}
+
+export async function apiDeleteComment(commentId) {
+  const state = store.getState();
+  const session = state.session;
+
+  // Ensure that the user is logged in
+  if (!isLoggedIn(session)) {
+    return null;
+  }
+
+  const token = session.token;
+  let response;
+  try {
+    response = await deleteRequest("/comments/" + commentId, token);
+  } catch (err) {
+    const action = {
+      data: err,
+      type: "error/set",
+    };
+    console.log("err", err);
+    // store.dispatch(action);
+    return true;
+  }
+
+  // If the delete was unautherised, dispatch error message
+  if (response.error) {
+    const action = {
+      data: response.error,
+      type: "error/set",
+    };
+
+    store.dispatch(action);
+    return false;
+  }
+
+  return true;
 }
 
 // --------------------- GET REQUESTS -----------------------------

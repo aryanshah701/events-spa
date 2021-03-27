@@ -14,6 +14,8 @@ function events(state = [], action) {
     case "events/update":
       const newStateUpdate = replaceEvent(state, action.data);
       return newStateUpdate;
+    case "session/logout":
+      return [];
     default:
       return state;
   }
@@ -28,8 +30,6 @@ function replaceEvent(state, newEvent) {
   const index = clonedState.findIndex(
     (event) => event.data.id === newEvent.data.id
   );
-
-  console.log("replace idx", index);
 
   // Replace the event
   clonedState.splice(index, 1, newEvent);
@@ -95,7 +95,6 @@ function session(state = loadSession(), action) {
       saveSessionToLocalStorage(action.data);
       return action.data;
     case "session/logout":
-      console.log("store logout");
       localStorage.removeItem("session");
       return null;
     default:

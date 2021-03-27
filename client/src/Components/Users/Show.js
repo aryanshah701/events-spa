@@ -47,7 +47,7 @@ function UserInfo({ userData, eventData }) {
         </Row>
         <Row>
           <Col>
-            <p>Number of hosted events: {eventData.length}</p>
+            <p>Number of events(hosted/invited): {eventData.length}</p>
           </Col>
         </Row>
       </Col>

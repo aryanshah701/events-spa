@@ -57,6 +57,10 @@ defmodule Api.Comments do
     comment
   end
 
+  def preload(comment) do
+    Repo.preload(comment, :event)
+  end
+
   @doc """
   Creates a comment.
 
