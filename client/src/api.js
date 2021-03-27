@@ -3,7 +3,7 @@ import store from "./store";
 
 const apiUrl =
   process.env.NODE_ENV === "production"
-    ? "https://events-api.aryanshah.tech/api/v1"
+    ? "http://events-api.aryanshah.tech/api/v1"
     : "http://localhost:4000/api/v1";
 
 // ---------------------- POST REQUESTS ----------------------------

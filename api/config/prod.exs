@@ -10,11 +10,18 @@ use Mix.Config
 # which you should run after static files are built and
 # before starting your production server.
 config :api, ApiWeb.Endpoint,
-  url: [host: "example.com", port: 80],
+  url: [host: "http://events-api.aryanshah.tech", port: 80],
   cache_static_manifest: "priv/static/cache_manifest.json"
 
 # Do not print debug messages in production
 config :logger, level: :info
+
+# Configure CORS
+config :cors_plug,
+  origin: ["http://events-spa.aryanshah.tech"],
+  max_age: 86400,
+  methods: ["GET", "POST", "PATCH", "DELETE"],
+  headers: ["x-auth", "content-type"]
 
 # ## SSL Support
 #
