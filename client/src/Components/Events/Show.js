@@ -11,7 +11,7 @@ import {
 import { connect } from "react-redux";
 import { useParams, useHistory, NavLink } from "react-router-dom";
 import { useState } from "react";
-import { apiPostInvite, apiPostComment, apiDeleteComment } from "../../api";
+import { apiPostInvite, apiPostComment } from "../../api";
 
 // The Event Show page
 function ShowEvent(props) {
@@ -307,30 +307,12 @@ function InviteForm({ event, history }) {
 
 // Comments display UI
 function Comments({ comments, event, history }) {
-  // To delete a comment
-  function deleteComment(commentId) {
-    apiDeleteComment(commentId).then((_success) => {
-      // Rerender the page to update the comments
-      history.push("/events/" + event.id);
-    });
-  }
-
   const commentList = comments.map((comment, idx) => {
     return (
       <tr key={idx}>
         <td className="col-lg-6">{comment.content}</td>
         <td className="col-lg-3">
           <Badge variant="info">by {comment.user}</Badge>
-        </td>
-        <td className="col-lg-3">
-          <button
-            className="btn btn-link text-danger"
-            onClick={() => {
-              deleteComment(comment.id);
-            }}
-          >
-            Delete
-          </button>
         </td>
       </tr>
     );

@@ -102,7 +102,7 @@ function isOwner(userId, event) {
 
 function Comments({ commentData }) {
   const comments = commentData.map((comment, idx) => {
-    const eventPath = "/events/" + comment.event_id;
+    const eventPath = "/events/" + comment.event;
     return (
       <ListGroup.Item key={idx}>
         <NavLink to={eventPath}>{comment.content}</NavLink>

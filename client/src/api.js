@@ -303,9 +303,6 @@ function getCommentCreateError(errors) {
   }
 }
 
-// --------------------- DELETE REQUESTS --------------------------
-export async function apiDeleteComment() {}
-
 // --------------------- GET REQUESTS -----------------------------
 
 async function getRequest(endpoint, token) {
