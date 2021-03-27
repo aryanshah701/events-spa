@@ -20,13 +20,14 @@ function ShowEvent(props) {
   const { id } = useParams();
 
   const { events, session } = props;
+
+  // Look for the event that needs to be shown
   const event = events.filter((event) => {
     return event.data.id === parseInt(id);
   })[0];
 
   // If event hasn't been fetched yet
   if (!event || event === undefined) {
-    // history.push("/users/show");
     return (
       <p>
         Loading(Something may have gone wrong... refresh the page or
@@ -258,6 +259,8 @@ function InviteForm({ event, history }) {
   // Controlled invite form
   const [invite, setInvite] = useState("");
 
+  const inviteLink = "http://events-spa.aryanshah.tech/events/" + event.id;
+
   // Submits the invite
   function submitInvite() {
     // Post the invite
@@ -270,9 +273,14 @@ function InviteForm({ event, history }) {
   return (
     <Row className="my-3">
       <Col className="col-lg-9 col-md-12">
+        <Row>
+          <Col className="mt-3">
+            <h4>Invite Someone!</h4>
+          </Col>
+        </Row>
         <Row className="my-3">
           <Col>
-            <h4>Invite Someone!</h4>
+            <Badge variant="info">Link: {inviteLink}</Badge>
           </Col>
         </Row>
         <Row>

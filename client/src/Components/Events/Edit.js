@@ -1,11 +1,30 @@
 import { Row, Col, Form, Button } from "react-bootstrap";
 import React, { useState } from "react";
-import DateTimePicker from "react-datetime-picker";
-import { useParams, NavLink } from "react-router-dom";
+import Datetime from "react-datetime";
+import { useParams, useHistory, NavLink } from "react-router-dom";
+import { connect } from "react-redux";
+import { apiUpdateEvent, fetchUserData } from "../../api";
 
-function EditEvent() {
+function EditEvent({ events }) {
   const { id } = useParams();
   const eventPath = "/events/" + id;
+
+  // Look for the event that needs to be edited
+  const event = events.filter((event) => {
+    return event.data.id === parseInt(id);
+  })[0];
+
+  // If event hasn't been fetched yet
+  if (!event || event === undefined) {
+    return (
+      <p>
+        Loading(Something may have gone wrong... refresh the page or
+        logout/login)
+      </p>
+    );
+  }
+
+  const eventData = event.data;
 
   return (
     <Row>
@@ -15,7 +34,7 @@ function EditEvent() {
             <h1>Edit Event</h1>
           </Col>
         </Row>
-        <EditEventForm />
+        <EditEventForm event={eventData} />
         <Row className="my-3">
           <Col>
             <NavLink to={eventPath}>Back</NavLink>
@@ -26,15 +45,37 @@ function EditEvent() {
   );
 }
 
-function EditEventForm() {
-  const [value, onChange] = useState(new Date());
+// Controlled event edit form
+function EditEventForm({ event }) {
+  // For redirection
+  const history = useHistory();
+
   const [newEvent, setEvent] = useState({
-    name: "",
-    description: "",
+    name: event.name,
+    description: event.description,
+    date: new Date(),
   });
 
   function editEvent(ev) {
     ev.preventDefault();
+
+    // PATCH request to the API
+    apiUpdateEvent(newEvent, event.id).then((success) => {
+      if (success) {
+        // If the event was successfully updated, navigate to the event's page
+        console.log("Event updated");
+
+        // Refetch the user data
+        const userDataSuccess = fetchUserData();
+
+        if (userDataSuccess) {
+          history.push("/events/" + event.id);
+        }
+      } else {
+        console.log("Event not updated");
+        history.push("/events/" + event.id + "/edit");
+      }
+    });
   }
 
   return (
@@ -68,7 +109,13 @@ function EditEventForm() {
 
           <Form.Group controlId="formDate">
             <Form.Label className="mx-2">Date: </Form.Label>
-            <DateTimePicker onChange={onChange} value={value} />
+            <Datetime
+              initialValue={new Date()}
+              value={newEvent.date}
+              onChange={(date) => {
+                setEvent({ ...newEvent, date: date.toDate() });
+              }}
+            />
           </Form.Group>
 
           <Button variant="primary" type="submit">
@@ -80,4 +127,10 @@ function EditEventForm() {
   );
 }
 
-export default EditEvent;
+function stateToProps(state) {
+  console.log(state);
+  const { events } = state;
+  return { events: events };
+}
+
+export default connect(stateToProps)(EditEvent);

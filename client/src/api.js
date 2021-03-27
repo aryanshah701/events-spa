@@ -108,7 +108,7 @@ function getRegisterationError(response) {
 }
 
 export async function apiCreateNewEvent(event) {
-  // Get the user id from the session and at it to the event
+  // Get the user id from the session and add it to the event
   const state = store.getState();
   const session = state.session;
 
@@ -300,6 +300,76 @@ function getCommentCreateError(errors) {
 
   if (errors.user_id) {
     return "User: " + errors.user_id[0];
+  }
+}
+
+// --------------------- PATCH REQUESTS ---------------------------
+async function patchRequest(endpoint, body, token = "") {
+  const options = {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "x-auth": token,
+    },
+    body: JSON.stringify(body),
+  };
+
+  const response = await fetch(apiUrl + endpoint, options);
+
+  return await response.json();
+}
+
+// Update an event
+export async function apiUpdateEvent(event, eventId) {
+  // Get the user id from the session and add it to the event
+  const state = store.getState();
+  const session = state.session;
+
+  // Ensure that the user is logged in
+  if (!isLoggedIn(session)) {
+    return null;
+  }
+
+  const token = session.token;
+  const userId = session.id;
+
+  const newEvent = {
+    ...event,
+    user_id: userId,
+  };
+
+  // Send the patch request
+  const response = await patchRequest(
+    "/events/" + eventId,
+    {
+      event: newEvent,
+    },
+    token
+  );
+
+  if (response.data) {
+    // If the event updation was successful, dispatch an events/update to update the redux state
+    const updateEventAction = {
+      data: response,
+      type: "events/update",
+    };
+    store.dispatch(updateEventAction);
+
+    return true;
+  } else {
+    // If the event updation is not successful, dispatch an error
+    const err = getEventCreateError(response.errors);
+
+    if (err !== "") {
+      const errorAction = {
+        data: err,
+        type: "error/set",
+      };
+
+      store.dispatch(errorAction);
+    }
+
+    return false;
   }
 }
 

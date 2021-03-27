@@ -33,13 +33,11 @@ function NewEventForm() {
   // Triggers POST to create an event
   function createNewEvent(ev) {
     ev.preventDefault();
-    console.log("Submit");
 
     // POST request to the API
     apiCreateNewEvent(newEvent).then((eventId) => {
       if (eventId) {
         // If the event was successfully created, navigate to the event's page
-        console.log("Event created");
 
         // Refetch the user data
         const userDataSuccess = fetchUserData();
