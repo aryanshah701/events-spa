@@ -38,7 +38,8 @@ defmodule ApiWeb.EventView do
     %{id: event.id,
       name: event.name,
       date: event.date,
-      description: event.description
+      description: event.description,
+      user_id: event.user_id
       }
   end
 end

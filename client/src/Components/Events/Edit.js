@@ -1,10 +1,11 @@
 import { Row, Col, Form, Button } from "react-bootstrap";
 import React, { useState } from "react";
 import DateTimePicker from "react-datetime-picker";
-import { useParams } from "react-router-dom";
+import { useParams, NavLink } from "react-router-dom";
 
 function EditEvent() {
   const { id } = useParams();
+  const eventPath = "/events/" + id;
 
   return (
     <Row>
@@ -15,6 +16,11 @@ function EditEvent() {
           </Col>
         </Row>
         <EditEventForm />
+        <Row className="my-3">
+          <Col>
+            <NavLink to={eventPath}>Back</NavLink>
+          </Col>
+        </Row>
       </Col>
     </Row>
   );

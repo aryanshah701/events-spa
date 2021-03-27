@@ -21,13 +21,18 @@ function ShowEvent(props) {
 
   const { events, session } = props;
   const event = events.filter((event) => {
-    return event.data.id == id;
+    return event.data.id === parseInt(id);
   })[0];
 
   // If event hasn't been fetched yet
   if (!event || event === undefined) {
     // history.push("/users/show");
-    return <p>Loading</p>;
+    return (
+      <p>
+        Loading(Something may have gone wrong... refresh the page or
+        logout/login)
+      </p>
+    );
   }
 
   const eventData = event.data;
@@ -35,6 +40,9 @@ function ShowEvent(props) {
   const invites = eventData.invites.data;
   const comments = eventData.comments.data;
   const isOwner = session.id === ownerData.id;
+  const isInvite = invites.some(
+    (invite) => invite.email === session.user_email
+  );
   const editPath = "/events/" + eventData.id + "/edit";
 
   // If Owner, then provide invite link and input box
@@ -47,8 +55,8 @@ function ShowEvent(props) {
 
   // If not Owner, then provide invite response options
   let inviteResponse = null;
-  if (!isOwner) {
-    inviteResponse = <InviteResponse event={eventData} />;
+  if (isInvite) {
+    inviteResponse = <InviteResponse event={eventData} history={history} />;
   }
 
   return (
@@ -177,7 +185,17 @@ function InviteInfo({ event }) {
   );
 }
 
-function InviteResponse({ event }) {
+// Invite response UI
+function InviteResponse({ event, history }) {
+  // Update the invite with the new response
+  function updateInvite(response) {
+    // Make the post request for the new and updated invite
+    apiPostInvite(null, event.id, response).then((_success) => {
+      // Rerender the page
+      history.push("/events/" + event.id);
+    });
+  }
+
   return (
     <Row className="my-3">
       <Col>
@@ -185,13 +203,25 @@ function InviteResponse({ event }) {
           <Col>Your Response</Col>
         </Row>
         <Row>
-          <Button variant="success" className="mx-2">
+          <Button
+            variant="success"
+            className="mx-2"
+            onClick={() => updateInvite("yes")}
+          >
             Yes
           </Button>
-          <Button variant="danger" className="mx-2">
+          <Button
+            variant="danger"
+            className="mx-2"
+            onClick={() => updateInvite("no")}
+          >
             No
           </Button>
-          <Button variant="info" className="mx-2">
+          <Button
+            variant="info"
+            className="mx-2"
+            onClick={() => updateInvite("maybe")}
+          >
             Maybe
           </Button>
         </Row>
@@ -257,7 +287,7 @@ function InviteForm({ event, history }) {
                 value={invite}
                 onChange={(ev) => setInvite(ev.target.value)}
                 onKeyPress={(ev) => {
-                  if (ev.key == "Enter") {
+                  if (ev.key === "Enter") {
                     submitInvite();
                   }
                 }}

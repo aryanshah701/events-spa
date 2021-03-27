@@ -1,4 +1,3 @@
-import { findIndex } from "lodash";
 // Design of functions taken from Tuck notes 0323 store.js
 
 // File for redux reducer functions
@@ -14,7 +13,6 @@ function events(state = [], action) {
       return newStateAdd;
     case "events/update":
       const newStateUpdate = replaceEvent(state, action.data);
-      console.log("updated events", newStateUpdate);
       return newStateUpdate;
     default:
       return state;

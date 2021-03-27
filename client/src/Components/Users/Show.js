@@ -1,25 +1,30 @@
 // Show page for a user
-import { Row, Col, ListGroup } from "react-bootstrap";
+import { Row, Col, ListGroup, Badge } from "react-bootstrap";
 import { connect } from "react-redux";
 import { NavLink } from "react-router-dom";
 
 function ShowUser(props) {
-  const { user } = props;
+  const { user, events } = props;
 
   // If the user data wasn't loaded successfully
   if (!user) {
-    return <h1>Loading</h1>;
+    return (
+      <p>
+        Loading(Something may have gone wrong... refresh the page or
+        logout/login)
+      </p>
+    );
   }
 
   const userData = user.data;
-  const eventData = userData.events.data;
+  const eventData = events.map((eventInList) => eventInList.data);
   const commentData = userData.comments.data;
 
   return (
     <Row className="my-5">
       <Col>
         <UserInfo userData={userData} eventData={eventData} />
-        <Events eventData={eventData} />
+        <Events eventData={eventData} userId={userData.id} />
         <Comments commentData={commentData} />
       </Col>
     </Row>
@@ -50,12 +55,19 @@ function UserInfo({ userData, eventData }) {
   );
 }
 
-function Events({ eventData }) {
+// Display all the events hosted by the user and the user is invited to
+function Events({ eventData, userId }) {
   const events = eventData.map((event, idx) => {
+    const attendeeType = isOwner(userId, event) ? "Host" : "Invite";
     const eventPath = "/events/" + event.id;
     return (
       <ListGroup.Item key={idx}>
-        <NavLink to={eventPath}>{event.name}</NavLink>
+        <NavLink to={eventPath}>
+          {event.name}
+          <Badge className="float-right" variant="info">
+            {attendeeType}
+          </Badge>
+        </NavLink>
       </ListGroup.Item>
     );
   });
@@ -65,7 +77,7 @@ function Events({ eventData }) {
       <Col className="col-lg-6 col-md-12">
         <Row>
           <Col>
-            <h2>Your Hosted Events</h2>
+            <h2>Your Events</h2>
           </Col>
         </Row>
         <Row>
@@ -81,6 +93,11 @@ function Events({ eventData }) {
       </Col>
     </Row>
   );
+}
+
+// Checks whether or not the user is the owner of the given event
+function isOwner(userId, event) {
+  return event.user.data.id === userId;
 }
 
 function Comments({ commentData }) {
@@ -112,8 +129,9 @@ function Comments({ commentData }) {
 }
 
 function stateToProps(state) {
-  let { user } = state;
-  return { user: user };
+  let { user, events } = state;
+  console.log(events);
+  return { user: user, events: events };
 }
 
 export default connect(stateToProps)(ShowUser);

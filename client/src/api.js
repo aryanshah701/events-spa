@@ -167,20 +167,30 @@ function getEventCreateError(errors) {
   }
 }
 
-export async function apiPostInvite(invite_email, event_id) {
+export async function apiPostInvite(
+  inviteEmail,
+  eventId,
+  userResponse = "no response"
+) {
   // Ensure that the user is logged in
   const state = store.getState();
   const session = state.session;
 
-  // Ensure that the user is logged in
   if (!isLoggedIn(session)) {
     return false;
   }
 
-  const token = session.token;
-  const invite = { email: invite_email, event_id: event_id };
+  // If the invite email wasn't given, the use the logged in user's email
+  if (!inviteEmail) {
+    inviteEmail = session.user_email;
+  }
 
-  console.log("token", token);
+  const token = session.token;
+  const invite = {
+    email: inviteEmail,
+    event_id: eventId,
+    response: userResponse,
+  };
 
   const response = postRequest("/invites", { invite: invite }, token).then(
     (response) => {
@@ -268,42 +278,17 @@ export function fetchUserData() {
       store.dispatch(action);
 
       // Fetch the user's events
-      const eventsFetched = fetchEvents();
+      const eventsFetched = fetchEvents(true);
 
-      return eventsFetched;
+      // Fetch the user's invites to events
+      const invitedEventsFetched = fetchEvents(false);
+
+      return eventsFetched && invitedEventsFetched;
     })
     .catch((err) => {
       console.log("err", err);
       return false;
     });
-
-  return isSuccess;
-}
-
-// Fetch all the events the user is authorised to see
-export function fetchEvents() {
-  let state = store.getState();
-  const session = state.session;
-
-  // If the user is not logged in, dispatch error
-  if (!isLoggedIn(session)) {
-    return false;
-  }
-
-  if (!state.user) {
-    return false;
-  }
-
-  // If the user is logged in, fetch the event info for all events
-  const user = state.user.data;
-  const token = session.token;
-  const events = user.events.data;
-  let isSuccess = true;
-
-  for (const eventData of events) {
-    const fetchSuccess = fetchEventData(eventData.id, token);
-    isSuccess = isSuccess && fetchSuccess;
-  }
 
   return isSuccess;
 }
@@ -321,6 +306,46 @@ function isLoggedIn(session) {
   }
 
   return true;
+}
+
+// Fetch all the events the user is authorised to see
+export function fetchEvents(isOwner) {
+  let state = store.getState();
+  const session = state.session;
+
+  // If the user is not logged in, dispatch error
+  if (!isLoggedIn(session)) {
+    return false;
+  }
+
+  if (!state.user) {
+    return false;
+  }
+
+  // If the user is logged in, fetch the event info for all events
+  const user = state.user.data;
+  const token = session.token;
+  let isSuccess = true;
+
+  // Fetch owned events
+  if (isOwner) {
+    const events = user.events.data;
+    for (const eventData of events) {
+      const fetchSuccess = fetchEventData(eventData.id, token);
+      isSuccess = isSuccess && fetchSuccess;
+    }
+  }
+
+  // Fetch invited to events
+  if (!isOwner) {
+    const events = user.invite_events.data;
+    for (const eventData of events) {
+      const fetchSuccess = fetchEventData(eventData.id, token);
+      isSuccess = isSuccess && fetchSuccess;
+    }
+  }
+
+  return isSuccess;
 }
 
 export function fetchEventData(eventId, token) {

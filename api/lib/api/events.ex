@@ -59,6 +59,20 @@ defmodule Api.Events do
     end
   end
 
+  # Get all the events with the given user as an invite
+  def get_invited_to_events(email) do
+    events = list_events()
+    |> Enum.filter(fn event -> user_is_invite?(event, email) end)
+
+    events
+  end
+
+  def user_is_invite?(event, email) do
+    event = Repo.preload(event, :invites)
+    invites = event.invites
+    Enum.any?(invites, fn invite -> invite.email == email end)
+  end
+
   # Load the stats of the event(invites, yes, no etc)
   def load_stats(%Event{} = event) do
     event = Repo.preload(event, :invites)
