@@ -3,7 +3,7 @@ import store from "./store";
 
 const apiUrl =
   process.env.NODE_ENV === "production"
-    ? "http://events-api.aryanshah.tech/api/v1"
+    ? "https://events-api.aryanshah.tech/api/v1"
     : "http://localhost:4000/api/v1";
 
 // ---------------------- POST REQUESTS ----------------------------
@@ -401,11 +401,11 @@ export async function apiDeleteComment(commentId) {
     response = await deleteRequest("/comments/" + commentId, token);
   } catch (err) {
     const action = {
-      data: err,
-      type: "error/set",
+      data: "Comment deleted! Please revisit the page to see the change.",
+      type: "success/set",
     };
-    console.log("err", err);
-    // store.dispatch(action);
+    
+    store.dispatch(action);
     return true;
   }
 

@@ -329,7 +329,6 @@ function Comments({ comments, event, history, userId }) {
     apiDeleteComment(commentId).then((success) => {
       if (success) {
         window.location.reload();
-        console.log("comment deleted");
       } else {
         console.log("comment not deleted");
       }
