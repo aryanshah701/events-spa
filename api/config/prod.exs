@@ -14,7 +14,7 @@ config :logger, level: :info
 
 # Configure CORS
 config :cors_plug,
-  origin: ["http://events-spa.aryanshah.tech"],
+  origin: ["https://events-psi.vercel.app"],
   max_age: 86400,
   methods: ["GET", "POST", "PATCH", "DELETE"],
   headers: ["x-auth", "content-type"]
