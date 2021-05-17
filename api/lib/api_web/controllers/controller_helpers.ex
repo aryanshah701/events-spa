@@ -12,6 +12,12 @@ defmodule ApiWeb.ControllerHelpers do
     {hour, minute, second} = parse_time(time)
 
     # Create the datetime object
+    IO.inspect year
+    IO.inspect month
+    IO.inspect day
+    IO.inspect hour
+    IO.inspect minute
+    IO.inspect second
     {:ok, datetime} = NaiveDateTime.new(year, month, day, hour, minute, second)
     
     datetime
@@ -34,7 +40,7 @@ defmodule ApiWeb.ControllerHelpers do
     second = 0
 
     # Adding 4 hours to correct timezone
-    hour = hour + 4
+    hour = hour - 4
     {hour, minute, second}
   end 
 end
