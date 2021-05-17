@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "dokku": {
+      "postdeploy": "cd api && mix ecto.migrate"
+    }
+  }
+}
