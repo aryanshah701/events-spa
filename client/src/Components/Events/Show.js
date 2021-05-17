@@ -337,6 +337,7 @@ function Comments({ comments, event, history, userId }) {
 
   // Checks if the logged in owner is authorised
   function commentOwner(comment) {
+    // eslint-disable-next-line
     return userId == comment.user_id || userId === event.user.data.id;
   }
 
